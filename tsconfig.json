@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "lib": ["esnext", "dom", "es2019"],
+    "types": ["node", "jest", "msw"],
+    "noEmit": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "incremental": true,
+    "moduleResolution": "node"
+  }
+}

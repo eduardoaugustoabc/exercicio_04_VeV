@@ -1,0 +1,120 @@
+openapi: 3.1.0
+
+info:
+  title: Sistema de Entregas
+  version: 1.0.0
+tags:
+  - name: Entregas
+
+paths:
+  /shipping/calculate:
+    get:
+      summary: Calcular o frete de uma entrega
+      operationId: shipping/calculate/get
+      tags:
+        - Entregas
+      parameters:
+        - name: originCityName
+          in: query
+          description: O nome da cidade de origem
+          required: true
+          schema:
+            type: string
+            example: São Paulo, SP
+        - name: destinationCityName
+          in: query
+          description: O nome da cidade de destino
+          required: true
+          schema:
+            type: string
+            example: Recife, PE
+        - name: weightInKilograms
+          in: query
+          description: O peso da entrega em quilogramas (kg)
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 5.3
+        - name: volumeInLiters
+          in: query
+          description: O volume da entrega em litros (L)
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 0.1
+      responses:
+        '200':
+          description: Frete calculado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingCost'
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '5XX':
+          description: Erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    ShippingCost:
+      type: object
+      required:
+        - distanceInKilometers
+        - costInCents
+      properties:
+        distanceInKilometers:
+          type: number
+          description: A distância em quilômetros (km)
+          format: double
+          example: 145.3
+        costInCents:
+          type: number
+          description: O custo do frete em reais
+          format: double
+          example: 7250
+
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A mensagem de erro
+          example: Entrada inválida
+
+    NotFoundError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A mensagem de erro
+          example: Item não encontrado
+
+    InternalServerError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A mensagem de erro
+          example: Erro inesperado
