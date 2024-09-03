@@ -1,0 +1,124 @@
+openapi: 3.1.0
+
+info:
+  title: Sistema de Compartilhamento
+  version: 1.0.0
+tags:
+  - name: Compartilhamentos
+
+paths:
+  /shares/files:
+    post:
+      summary: Compartilhar um arquivo
+      operationId: shares/files/create
+      tags:
+        - Compartilhamentos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: O nome do arquivo
+                  example: file.docx
+                mode:
+                  type: string
+                  description: |
+                    O modo de compartilhamento do arquivo:
+                    - public: Qualquer pessoa pode acessar o arquivo;
+                    - private: Apenas o dono do arquivo pode acessá-lo.
+                  enum:
+                    - public
+                    - private
+                  default: public
+                  example: public
+                convertTo:
+                  type: string
+                  description: |
+                    O tipo de arquivo para o qual o arquivo deve ser convertido.
+                    Se não for fornecido, o arquivo original será compartilhado.
+                  example: pdf
+      responses:
+        '200':
+          description: Arquivo compartilhado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedFile'
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '5XX':
+          description: Erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    SharedFile:
+      type: object
+      required:
+        - id
+        - name
+        - mode
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: O identificador do arquivo compartilhado
+          example: 1
+        name:
+          type: string
+          description:
+            O nome do arquivo após a conversão, ou o nome original se não foi
+            convertido
+          example: file.docx
+        mode:
+          type: string
+          description: |
+            O modo de compartilhamento do arquivo:
+            - public: Qualquer pessoa pode acessar o arquivo;
+            - private: Apenas o dono do arquivo pode acessá-lo.
+          enum:
+            - public
+            - private
+          example: public
+        originalFile:
+          type: object
+          description:
+            O arquivo original; presente apenas se o arquivo foi convertido
+          properties:
+            name:
+              type: string
+              description: O nome do arquivo original
+              example: file.docx
+
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A mensagem de erro
+          example: Entrada inválida
+
+    InternalServerError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A mensagem de erro
+          example: Erro inesperado

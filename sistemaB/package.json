@@ -1,0 +1,31 @@
+{
+  "name": "app-delivery",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "dotenv -c development -- tsx watch --clear-screen=false src/index.ts",
+    "test": "dotenv -c test -- dotenv -c development -- vitest",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/swagger": "^8.15.0",
+    "@fastify/swagger-ui": "^4.0.1",
+    "axios": "^1.7.2",
+    "dotenv-cli": "^7.4.2",
+    "fastify": "^4.28.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/supertest": "^6.0.2",
+    "msw": "^2.3.5",
+    "supertest": "^7.0.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.4",
+    "zimic": "^0.9.1"
+  },
+  "stackblitz": {
+    "installDependencies": true,
+    "startCommand": "npm run dev",
+    "compileTrigger": "save"
+  }
+}
