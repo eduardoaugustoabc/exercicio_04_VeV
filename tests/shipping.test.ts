@@ -8,8 +8,18 @@ import { setupServer } from 'msw/node';
 const server = setupServer(
   http.get('https://v2-location-d8b1dd3.vercel.app/json', () => {
     return HttpResponse.json({
-      city: 'São Paulo',
-      state: 'SP',
+      id: 'origin-city-id',
+      name: 'São Paulo',
+      state: { code: 'SP' },
+      country: { code: 'BRA' },
+    });
+  }),
+  http.get('https://v2-location-d8b1dd3.vercel.app/json', () => {
+    return HttpResponse.json({
+      id: 'destination-city-id',
+      name: 'Campinas',
+      state: { code: 'SP' },
+      country: { code: 'BRA' },
     });
   }),
   http.get('https://v2-location-d8b1dd3.vercel.app/json', () => {
@@ -38,8 +48,11 @@ describe('Shipping', () => {
   });
 
   test('caso 1: deve retornar a localização correta', async () => {
+    const originCityId = 'origin-city-id';
+    const destinationCityId = 'destination-city-id';
+
     const response = await supertest(app.server)
-      .get('/shipping/calculate')
+      .get(`/cities/${originCityId}/distances/cities/${destinationCityId}`)
       .query({
         originCityName: 'São Paulo, SP',
         destinationCityName: 'Recife, PE',
@@ -82,36 +95,20 @@ describe('Shipping', () => {
   });
 
   test('caso 3: deve retornar custo de frete zero para cidades no mesmo estado', async () => {
-    server.use(
-      http.get('https://v2-location-d8b1dd3.vercel.app/json', () => {
-        return HttpResponse.json([
-          {
-            id: 'origin-city-id',
-            name: 'São Paulo',
-            stateCode: 'SP',
-            countryCode: 'BRA',
-          },
-          {
-            id: 'destination-city-id',
-            name: 'Campinas',
-            stateCode: 'SP',
-            countryCode: 'BRA',
-          },
-        ]);
-      })
-    );
+    const originCityId = 'origin-city-id';
+    const destinationCityId = 'destination-city-id';
 
     const response = await supertest(app.server)
-      .get('/shipping/calculate')
+      .get(`/cities/${originCityId}/distances/cities/${destinationCityId}`)
       .query({
         originCityName: 'São Paulo, SP',
-        destinationCityName: 'Campinas, SP',
+        destinationCityName: 'Recife, PE',
         weightInKilograms: 10,
         volumeInLiters: 0.1,
       } satisfies CalculateShippingQuery);
 
     expect(response.status).toBe(200);
-    expect(response.body.costInCents).toBe(null);
+    expect(response.body.costInCents).toBe(0);
   });
 
   test('caso 4: Erro de validação no cálculo de frete que dá undefined', async () => {
@@ -124,7 +121,6 @@ describe('Shipping', () => {
         volumeInLiters: 0.1,
       } satisfies CalculateShippingQuery);
 
-    console.log(response.body.error);
     expect(response.status).toBe(400);
     expect(response.body.error).toBe(undefined);
   });
